@@ -1,7 +1,10 @@
 package main
 
+//go run cmd/web/*
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -11,7 +14,24 @@ func home(rw http.ResponseWriter, r *http.Request){
     http.NotFound(rw, r)
     return
   } 
-  rw.Write([]byte("Bem vindo ao SnipetBox"))
+
+  files := []string{
+    "./ui/html/home.page.tmpl.html",
+    "./ui/html/base.layout.tmpl.html",
+    "./ui/html/footer.partial.tmpl.html",
+  }
+  ts, err := template.ParseFiles(files...)
+  if err != nil{
+    log.Println(err.Error())
+    http.Error(rw, "Internal Error",500)
+    return
+  }
+  err = ts.Execute(rw, nil)
+  if err != nil{
+    log.Println(err.Error())
+    http.Error(rw, "Internal Error",500)
+    return
+  }
 }
 
 //http://localhost:4000/snippet?id=123
