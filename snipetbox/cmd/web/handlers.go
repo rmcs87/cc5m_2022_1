@@ -10,7 +10,7 @@ import (
 
 func(app *application) home(rw http.ResponseWriter, r *http.Request){
   if r.URL.Path != "/"{
-    http.NotFound(rw, r)
+    app.notFound(rw)
     return
   } 
 
@@ -21,14 +21,12 @@ func(app *application) home(rw http.ResponseWriter, r *http.Request){
   }
   ts, err := template.ParseFiles(files...)
   if err != nil{
-    app.errorLog.Println(err.Error())
-    http.Error(rw, "Internal Error",500)
+    app.serverError(rw, err)
     return
   }
   err = ts.Execute(rw, nil)
   if err != nil{
-    app.errorLog.Println(err.Error())
-    http.Error(rw, "Internal Error",500)
+    app.serverError(rw, err)
     return
   }
 }
@@ -37,7 +35,7 @@ func(app *application) home(rw http.ResponseWriter, r *http.Request){
 func(app *application) showSnippet(rw http.ResponseWriter, r *http.Request){
   id,err := strconv.Atoi(r.URL.Query().Get("id"))
   if err != nil || id < 1 {
-    http.NotFound(rw, r)
+    app.notFound(rw)
     return
   }
   fmt.Fprintf(rw, "Exibir o Snippet de ID: %d", id)
@@ -46,7 +44,7 @@ func(app *application) showSnippet(rw http.ResponseWriter, r *http.Request){
 func(app *application) createSnippet(rw http.ResponseWriter, r *http.Request){
   if r.Method != "POST"{
     rw.Header().Set("Allow","POST")
-    http.Error(rw, "Metodo não permitido", http.StatusMethodNotAllowed)
+    app.clientError(rw, http.StatusMethodNotAllowed)
     return
   }
   
