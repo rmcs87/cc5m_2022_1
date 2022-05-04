@@ -7,15 +7,17 @@ import (
 	"net/http"
 	"os"
 
-  _ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/rmcs87/cc5m/pkg/models/mysql"
 )
 
 type application struct{
   errorLog *log.Logger
   infoLog *log.Logger
+  snippets *mysql.SnippetModel
 }
 
-//curl -i -X GET http://localhost:4000/snippet/create
+//curl -i -X POST http://localhost:4000/snippet/create
 func main() {
 	// nome da flag, valor padra e descrição
 	addr := flag.String("addr", ":4000", "Porta da Rede")
@@ -37,6 +39,7 @@ func main() {
   app := &application{
     errorLog: errorLog,
     infoLog: infoLog,
+    snippets: &mysql.SnippetModel{DB:db},
   }
 
   srv := &http.Server{
