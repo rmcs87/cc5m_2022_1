@@ -6,6 +6,8 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/rmcs87/cc5m/pkg/models"
 )
 
 func (app *application) home(rw http.ResponseWriter, r *http.Request) {
@@ -13,6 +15,12 @@ func (app *application) home(rw http.ResponseWriter, r *http.Request) {
 		app.notFound(rw)
 		return
 	}
+
+  snippets, err := app.snippets.Latest()
+  if err != nil{
+    app.serverError(rw, err)
+    return
+  }
 
 	files := []string{
 		"./ui/html/home.page.tmpl.html",
@@ -24,21 +32,47 @@ func (app *application) home(rw http.ResponseWriter, r *http.Request) {
 		app.serverError(rw, err)
 		return
 	}
-	err = ts.Execute(rw, nil)
+	err = ts.Execute(rw, snippets)
 	if err != nil {
 		app.serverError(rw, err)
 		return
 	}
+
 }
 
-//http://localhost:4000/snippet?id=123
+//http://localhost:4000/snippet?id=1
 func (app *application) showSnippet(rw http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
 		app.notFound(rw)
 		return
 	}
-	fmt.Fprintf(rw, "Exibir o Snippet de ID: %d", id)
+
+  s, err := app.snippets.Get(id)
+  if err == models.ErrNoRecord {
+    app.notFound(rw)
+    return
+  }else if err != nil{
+    app.serverError(rw, err)
+    return
+  }
+  
+  files := []string{
+		"./ui/html/show.page.tmpl.html",
+		"./ui/html/base.layout.tmpl.html",
+		"./ui/html/footer.partial.tmpl.html",
+	}
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(rw, err)
+		return
+	}
+	err = ts.Execute(rw, s)
+	if err != nil {
+		app.serverError(rw, err)
+		return
+	}
+  
 }
 
 func (app *application) createSnippet(rw http.ResponseWriter, r *http.Request) {

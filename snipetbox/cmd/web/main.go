@@ -21,6 +21,7 @@ type application struct{
 func main() {
 	// nome da flag, valor padra e descrição
 	addr := flag.String("addr", ":4000", "Porta da Rede")
+  
   dsn := flag.String("dsn",
                      "RNNRfSNISQ:jMFmtb1Hby@tcp(remotemysql.com)/RNNRfSNISQ?parseTime=true", 
                      "MySql DSN")
